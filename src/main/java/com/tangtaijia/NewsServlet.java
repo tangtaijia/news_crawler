@@ -6,7 +6,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Enumeration;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
@@ -43,11 +42,14 @@ public class NewsServlet extends HttpServlet {
         }
 
         Statement stmt = null;
-        String query = "SELECT * FROM news;";
-
+        String keyword = req.getParameter("keyword");
+        String query = "SELECT * FROM news";
+        if(keyword != null && keyword != "")
+            query += " WHERE title like '%"+keyword+"%'";
         try {
             stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(query);
+            System.out.println(rs);
             List<News> newsList = new ArrayList<News>();
             while (rs.next()) {
                 News news = new News();
@@ -57,6 +59,7 @@ public class NewsServlet extends HttpServlet {
                 news.setSource(rs.getString("source"));
                 newsList.add(news);
             }
+            System.out.println(newsList);
             req.setAttribute("newsList",newsList);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -73,4 +76,5 @@ public class NewsServlet extends HttpServlet {
 
         rd.forward(req, res);
     }
+
 }

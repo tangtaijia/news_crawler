@@ -9,71 +9,38 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title> 爬虫新闻列表 </title>
+    <link href="static/bootstrap.min.css" rel="stylesheet">
+    <link href="static/qunit-1.11.0.css" rel="stylesheet">
     <script src="static/jquery.min.js"></script>
-    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="static/bootstrap.min.js"></script>
+    <script src="static/bootstrap-paginator.js"></script>
+    <script src="static/qunit-1.11.0.js"></script>
     <script type="text/javascript">
-        $(document).ready(function() {
-
+        $(function(){
+            var pagination = $('.pager');
             var listElement = $('#newStuff');
             var perPage = 8;
             var numItems = listElement.children().size();
             var numPages = Math.ceil(numItems / perPage);
+            listElement.children().hide().slice( 0,perPage ).show();
 
-            $('.pager').data("curr", 0);
-
-            var curr = 0;
-            $('<li class="previous"><a href="javascript:;">&laquo;</a></li>').appendTo('.pager');
-            if($('#more_page').val()) {
-                while (numPages > curr) {
-                    $('<li><a href="javascript:;" class="page_link">' + (curr + 1) + '</a></li>').appendTo('.pager');
-                    curr++;
+            var options = {
+                bootstrapMajorVersion:3,
+                numberOfPages: 5,
+                totalPages:numPages,
+                onPageClicked: function(e,originalEvent,type,page){
+                    var to_page = page - 1;
+                    listElement.children().hide().slice(to_page * perPage, to_page * perPage + perPage).show();
                 }
             }
-            $('<li class="next"><a href="javascript:;">&raquo;</a></li>').appendTo('.pager');
-
-            $('.pager .page_link:first').addClass('active');
-
-            listElement.children().hide();
-            listElement.children().slice(0, perPage).show();
-
-            $('.pager li').not(".previous,.next").find("a").click(function () {
-                var clickedPage = $(this).html().valueOf() - 1;
-                goTo(clickedPage, perPage);
-            });
-
-
-            $('.pager li.previous a').click(function () {
-                var goToPage = parseInt($('.pager').data("curr")) - 1;
-                if (goToPage>-1)
-                    goTo(goToPage);
-            });
-
-            $('.pager li.next a').click(function () {
-                var goToPage = parseInt($('.pager').data("curr")) + 1;
-                if (goToPage<numPages)
-                    goTo(goToPage);
-            });
-
-            function goTo(page) {
-                var startAt = page * perPage,
-                        endOn = startAt + perPage;
-
-                listElement.children().hide().slice(startAt, endOn).show();
-                $('.pager').data("curr", page);
-                var current_page = $('.pager li').filter(function (index) {
-                    return $(this).find('a').html() == page + 1;
-                });
-                current_page.closest('ul').find('a').removeClass("active");
-                current_page.find('a').addClass('active');
-            }
+            pagination.bootstrapPaginator(options);
         });
+
+
     </script>
     <style>
-        .active {
-            background-color: #286090 !important;
-            border-color: #204d74 !important;
-            color:#fff!important;
+        .pagination li a {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -88,7 +55,7 @@
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="keyword">关键字:</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" name="keyword" id="keyword" placeholder="请输入关键字...">
+                            <input type="text" class="form-control" name="keyword" id="keyword" value="${param.keyword}" placeholder="请输入关键字...">
                         </div>
                         <div class="col-sm-3 text-left">
                             <button type="submit" class="btn btn-default">搜索</button>
@@ -117,11 +84,10 @@
             </tbody>
         </table>
         <div class="text-center">
-            <div class="pagination pagination-large row-fluid">
-                <ul class="pager"></ul><div class="">共8页</div>
+            <div class="pagination pagination-large">
+                <ul class="pager"></ul>
             </div>
         </div>
-        <input type="hidden" id="more_page" value="${param.keyword}">
     </div>
 </div>
 </body>
