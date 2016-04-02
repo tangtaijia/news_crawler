@@ -1,26 +1,32 @@
 package com.tangtaijia;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.sql.Connection;
 
 /**
- * Created by taijia on 4/1/16.
+ * url访问类
  */
 public class HttpGet {
-    public final static void getByString(String url, Connection conn) throws Exception {
+    public final static void getByString(String url,String originUrl,String source, Connection conn) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
 
         try {
             org.apache.http.client.methods.HttpGet httpget = new org.apache.http.client.methods.HttpGet(url);
             System.out.println("executing request " + httpget.getURI());
+            Header header = new BasicHeader(
+                    "User-Agent",
+                    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1;  .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2)");
+            httpget.addHeader(header);
 
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
 
@@ -42,8 +48,10 @@ public class HttpGet {
             System.out.println(responseBody);
             System.out.println("----------------------------------------");
             */
-            ParsePage.parseFromString(responseBody,conn);
+            ParsePage.parseFromString(responseBody,conn,originUrl,source);
 
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             httpclient.close();
         }

@@ -1,5 +1,8 @@
 package com.tangtaijia;
 
+/**
+ * 新闻类
+ */
 public class News {
     private String hashkey;
     private String title;

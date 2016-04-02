@@ -5,7 +5,6 @@ import java.io.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
@@ -16,7 +15,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 
-
+/**
+ * 新闻servlet
+ */
 public class NewsServlet extends HttpServlet {
     public void doGet(HttpServletRequest req,
                       HttpServletResponse res)
@@ -24,19 +25,16 @@ public class NewsServlet extends HttpServlet {
 
         RequestDispatcher rd = req.getRequestDispatcher("list.jsp");
 
-        Properties prop = new Properties();
-        InputStream in = getClass().getResourceAsStream("/application.properties");
-        prop.load(in);
-        in.close();
+        DBbean dBbean = Utils.getDBbean();
         try {
-            Class.forName(prop.getProperty("datasource.driverClassName"));
+            Class.forName(dBbean.getDriver());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         Connection connection = null;
         try {
             connection = DriverManager
-                    .getConnection(prop.getProperty("datasource.url"), prop.getProperty("datasource.username"), prop.getProperty("datasource.password"));
+                    .getConnection(dBbean.getUrl(), dBbean.getName(), dBbean.getPwd());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -46,10 +44,10 @@ public class NewsServlet extends HttpServlet {
         String query = "SELECT * FROM news";
         if(keyword != null && keyword != "")
             query += " WHERE title like '%"+keyword+"%'";
+        query += " ORDER BY id DESC";
         try {
             stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            System.out.println(rs);
             List<News> newsList = new ArrayList<News>();
             while (rs.next()) {
                 News news = new News();
@@ -59,7 +57,6 @@ public class NewsServlet extends HttpServlet {
                 news.setSource(rs.getString("source"));
                 newsList.add(news);
             }
-            System.out.println(newsList);
             req.setAttribute("newsList",newsList);
         } catch (SQLException e) {
             e.printStackTrace();
