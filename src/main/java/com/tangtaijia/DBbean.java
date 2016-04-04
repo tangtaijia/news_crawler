@@ -1,8 +1,24 @@
 package com.tangtaijia;
+
+/**
+ * 数据库对象
+ */
  public class DBbean {
+    /**
+     * 驱动
+     */
      private String driver;
+    /**
+     * 用户名
+     */
      private String name;
+    /**
+     * 密码
+     */
      private String pwd;
+    /**
+     * 数据库url
+     */
      private String url;
 
      public String getDriver() {

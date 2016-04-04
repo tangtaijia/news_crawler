@@ -36,7 +36,7 @@ public class Crawler implements Runnable {
             Class.forName(dBbean.getDriver());
             conn = DriverManager
                     .getConnection(dBbean.getUrl(), dBbean.getName(), dBbean.getPwd());
-            System.out.println("connection built");
+            System.out.println("数据库已连接");
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -49,15 +49,16 @@ public class Crawler implements Runnable {
         int count = 0;
 
         if(conn != null) {
-            //crawl every link in the database
+            // 对record表中的所有链接进行爬取
             while(true) {
-                //get page content of link "url"
+                // 获取url中的内容并入库
                 synchronized (url) {
                     HttpGet.getByString(url,originUrl,source,conn);
                 }
                 Thread.sleep(2000);
                 count++;
 
+                // 如果record表中不存在该url，则插入
                 sql = "SELECT * FROM record WHERE URL = '" + url + "'";
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(sql);
@@ -66,37 +67,37 @@ public class Crawler implements Runnable {
                     stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                     stmt.executeUpdate(sql);
                 }
-                //set boolean value "crawled" to true after crawling this page
+                // 爬虫执行后对该url改为已爬取
                 sql = "UPDATE record SET crawled = 1 WHERE URL = '" + url + "' AND crawled=0";
                 stmt = conn.createStatement();
-                int updatedrows = stmt.executeUpdate(sql);
+                stmt.executeUpdate(sql);
 
                 logger.debug(sql);
-                //get the next page that has not been crawled yet
+                // 获取所有未爬取的记录
                 sql = "SELECT * FROM record WHERE crawled = 0 AND URL LIKE '" + originUrl + "%'";
                 stmt = conn.createStatement();
                 System.out.println(sql);
                 rs = stmt.executeQuery(sql);
+                // 如果存在，则更新当前的url
                 if (rs.next()) {
                     synchronized (url) {
                         url = rs.getString(2);
                     }
                 } else {
-                    //stop crawling if reach the bottom of the list
-                    System.out.println("at the bottom of list");
+                    System.out.println("爬虫停止：所有链接都跑完了");
                     break;
                 }
 
-                //set a limit of crawling count
+                // 设置一个爬取上限，暂定为10000
                 if (count > 10000 || url == null) {
-                    System.out.println("out of limit");
+                    System.out.println("爬虫停止:已达上限");
                     break;
                 }
             }
             conn.close();
             conn = null;
 
-            System.out.println("Done.");
+            System.out.println("完成.");
             System.out.println(count);
         }
     }
@@ -113,6 +114,7 @@ public class Crawler implements Runnable {
 
     public static void main(String args[]) {
         Properties prop = new Properties();
+        // 读取properties中的信息
         InputStream in = new Utils().getClass().getResourceAsStream("/application.properties");
         try {
             prop.load(in);
@@ -129,14 +131,14 @@ public class Crawler implements Runnable {
         Enumeration e = prop.propertyNames();
 
         /**
-         * 有几个url就启动几个线程
+         * 有几个url就启动几个爬虫线程
          */
         while (e.hasMoreElements()) {
             String key = (String) e.nextElement();
-            if(key.startsWith("news")) {
+            if (key.startsWith("news")) {
                 System.out.println(key + " -- " + prop.getProperty(key));
-                String[] values  =key.split("\\.");
-                Runnable crawler = new Crawler(prop.getProperty(key),prop.getProperty(key),values[1]);
+                String[] values = key.split("\\.");
+                Runnable crawler = new Crawler(prop.getProperty(key), prop.getProperty(key), values[1]);
                 Thread thread = new Thread(crawler);
                 thread.start();
             }

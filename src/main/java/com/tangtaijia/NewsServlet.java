@@ -40,7 +40,8 @@ public class NewsServlet extends HttpServlet {
         }
 
         Statement stmt = null;
-        String keyword = req.getParameter("keyword");
+        String keyword = req.getParameter("keyword"); // 关键字
+        // 获取所有数据并按照id逆序
         String query = "SELECT * FROM news";
         if(keyword != null && keyword != "")
             query += " WHERE title like '%"+keyword+"%'";
@@ -49,12 +50,14 @@ public class NewsServlet extends HttpServlet {
             stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             List<News> newsList = new ArrayList<News>();
+            // 组装新闻list
             while (rs.next()) {
                 News news = new News();
                 news.setTitle(rs.getString("title"));
                 news.setHashkey(rs.getString("hashkey"));
                 news.setUrl(rs.getString("url"));
                 news.setSource(rs.getString("source"));
+                news.setCreateTime(rs.getString("create_time"));
                 newsList.add(news);
             }
             req.setAttribute("newsList",newsList);
@@ -70,7 +73,7 @@ public class NewsServlet extends HttpServlet {
                 e.printStackTrace();
             }
         }
-
+        // 把新闻传到jsp前台
         rd.forward(req, res);
     }
 

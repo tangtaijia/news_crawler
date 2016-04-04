@@ -68,9 +68,10 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th style="width:33%;">哈希</th>
-                <th style="width:33%;">标题</th>
-                <th style="width:33%;">来源</th>
+                <th style="width:35%;">哈希</th>
+                <th style="width:35%;">标题</th>
+                <th style="width:15%;">来源</th>
+                <th style="width:15%;">时间</th>
             </tr>
             </thead>
             <tbody id="newStuff">
@@ -79,6 +80,7 @@
                     <td>${news.hashkey}</td>
                     <td><a target="_blank" href="${news.url}">${news.title}</a></td>
                     <td>${news.source}</td>
+                    <td>${news.createTime}</td>
                 </tr>
             </c:forEach>
             </tbody>

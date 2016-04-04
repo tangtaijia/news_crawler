@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS `crawler` CHARSET=utf8;
 
-USE DATABASE `crawler`;
+USE `crawler`;
 -- ----------------------------
 -- 新闻表
 -- ----------------------------
@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `news` (
   `title` varchar(255) NOT NULL DEFAULT '' COMMENT '标题',
   `url` varchar(255) NOT NULL DEFAULT '' COMMENT '链接',
   `source` varchar(255) NOT NULL DEFAULT '' COMMENT '来源',
+  `create_time`  datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间' ,
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash_key` (`hashkey`) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='新闻表';
